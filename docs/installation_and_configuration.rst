@@ -32,49 +32,8 @@ Here is a standard configuration for the user using the OpenAI API.
       EMBEDDING_MODEL=text-embedding-3-small
       CHAT_MODEL=gpt-4-turbo
 
-Azure OpenAI
-------------
-
-The following environment variables are standard configuration options for the user using the OpenAI API.
-
-   .. code-block:: Properties
-
-      USE_AZURE=True
-
-      EMBEDDING_OPENAI_API_KEY=<replace_with_your_azure_openai_api_key>
-      EMBEDDING_AZURE_API_BASE=  # The endpoint for the Azure OpenAI API.
-      EMBEDDING_AZURE_API_VERSION=  # The version of the Azure OpenAI API.
-      EMBEDDING_MODEL=text-embedding-3-small
-
-      CHAT_OPENAI_API_KEY=<replace_with_your_azure_openai_api_key>
-      CHAT_AZURE_API_BASE=  # The endpoint for the Azure OpenAI API.
-      CHAT_AZURE_API_VERSION=  # The version of the Azure OpenAI API.
-      CHAT_MODEL=  # The model name of the Azure OpenAI API.
-
-Use Azure Token Provider
-------------------------
-
-If you are using the Azure token provider, you need to set the `CHAT_USE_AZURE_TOKEN_PROVIDER` and `EMBEDDING_USE_AZURE_TOKEN_PROVIDER` environment variable to `True`. then 
-use the environment variables provided in the `Azure Configuration section <installation_and_configuration.html#azure-openai>`_.
-
-
-☁️ Azure Configuration
-- Install Azure CLI:
-
-   ```sh
-   curl -L https://aka.ms/InstallAzureCli | bash
-   ```
-
-- Log in to Azure:
-
-   ```sh
-   az login --use-device-code
-   ```
-
-- `exit` and re-login to your environment (this step may not be necessary).
-
-
 Configuration List
+
 ------------------
 
 .. TODO: use `autodoc-pydantic` .
@@ -94,20 +53,7 @@ Configuration List
 +-----------------------------------+-----------------------------------------------------------------+-------------------------+
 | CHAT_MODEL                        | Name of the chat model                                          | gpt-4-turbo             |
 +-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| EMBEDDING_AZURE_API_BASE          | Base URL for the Azure OpenAI API                               | None                    |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| EMBEDDING_AZURE_API_VERSION       | Version of the Azure OpenAI API                                 | None                    |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| CHAT_AZURE_API_BASE               | Base URL for the Azure OpenAI API                               | None                    |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| CHAT_AZURE_API_VERSION            | Version of the Azure OpenAI API                                 | None                    |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| USE_AZURE                         | True if you are using Azure OpenAI                              | False                   |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| CHAT_USE_AZURE_TOKEN_PROVIDER     | True if you are using an Azure Token Provider in chat model     | False                   |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
-| EMBEDDING_USE_AZURE_TOKEN_PROVIDER| True if you are using an Azure Token Provider in embedding model| False                   |
-+-----------------------------------+-----------------------------------------------------------------+-------------------------+
+
 
 - Globol Setting
 

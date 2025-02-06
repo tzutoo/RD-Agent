@@ -8,7 +8,6 @@ loguru
 fire
 fuzzywuzzy
 openai
-azure.identity
 
 numpy # we use numpy as default data format. So we have to install numpy
 pandas # we use pandas as default data format. So we have to install pandas
@@ -21,10 +20,10 @@ pymupdf  # Extract shotsreens from pdf
 
 # PDF related
 pypdf
-azure-ai-formrecognizer
 
 # factor implementations
 tables
+
 
 # CI Fix Tool
 tree-sitter-python

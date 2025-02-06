@@ -34,14 +34,10 @@ def md5_hash(input_string: str) -> str:
 
 
 try:
-    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
-except ImportError:
-    logger.warning("azure.identity is not installed.")
-
-try:
     import openai
 except ImportError:
     logger.warning("openai is not installed.")
+
 
 try:
     from llama import Llama
@@ -305,14 +301,7 @@ class APIBackend:
             self.chat_model = LLM_SETTINGS.chat_model if chat_model is None else chat_model
             self.encoder = None
         else:
-            self.chat_use_azure = LLM_SETTINGS.chat_use_azure or LLM_SETTINGS.use_azure
-            self.embedding_use_azure = LLM_SETTINGS.embedding_use_azure or LLM_SETTINGS.use_azure
-            self.chat_use_azure_token_provider = LLM_SETTINGS.chat_use_azure_token_provider
-            self.embedding_use_azure_token_provider = LLM_SETTINGS.embedding_use_azure_token_provider
-            self.managed_identity_client_id = LLM_SETTINGS.managed_identity_client_id
-
             # Priority: chat_api_key/embedding_api_key > openai_api_key > os.environ.get("OPENAI_API_KEY")
-            # TODO: Simplify the key design. Consider Pandatic's field alias & priority.
             self.chat_api_key = (
                 chat_api_key
                 or LLM_SETTINGS.chat_openai_api_key
@@ -331,53 +320,21 @@ class APIBackend:
             self.encoder = self._get_encoder()
             self.chat_openai_base_url = LLM_SETTINGS.chat_openai_base_url
             self.embedding_openai_base_url = LLM_SETTINGS.embedding_openai_base_url
-            self.chat_api_base = LLM_SETTINGS.chat_azure_api_base if chat_api_base is None else chat_api_base
-            self.chat_api_version = (
-                LLM_SETTINGS.chat_azure_api_version if chat_api_version is None else chat_api_version
-            )
             self.chat_stream = LLM_SETTINGS.chat_stream
             self.chat_seed = LLM_SETTINGS.chat_seed
 
             self.embedding_model = LLM_SETTINGS.embedding_model if embedding_model is None else embedding_model
-            self.embedding_api_base = (
-                LLM_SETTINGS.embedding_azure_api_base if embedding_api_base is None else embedding_api_base
-            )
-            self.embedding_api_version = (
-                LLM_SETTINGS.embedding_azure_api_version if embedding_api_version is None else embedding_api_version
+
+            self.chat_client: openai.OpenAI = openai.OpenAI(
+                api_key=self.chat_api_key,
+                base_url=self.chat_openai_base_url
             )
 
-            if (self.chat_use_azure or self.embedding_use_azure) and (
-                self.chat_use_azure_token_provider or self.embedding_use_azure_token_provider
-            ):
-                dac_kwargs = {}
-                if self.managed_identity_client_id is not None:
-                    dac_kwargs["managed_identity_client_id"] = self.managed_identity_client_id
-                credential = DefaultAzureCredential(**dac_kwargs)
-                token_provider = get_bearer_token_provider(
-                    credential,
-                    "https://cognitiveservices.azure.com/.default",
-                )
-            self.chat_client: openai.OpenAI = (
-                openai.AzureOpenAI(
-                    azure_ad_token_provider=token_provider if self.chat_use_azure_token_provider else None,
-                    api_key=self.chat_api_key if not self.chat_use_azure_token_provider else None,
-                    api_version=self.chat_api_version,
-                    azure_endpoint=self.chat_api_base,
-                )
-                if self.chat_use_azure
-                else openai.OpenAI(api_key=self.chat_api_key, base_url=self.chat_openai_base_url)
+            self.embedding_client: openai.OpenAI = openai.OpenAI(
+                api_key=self.embedding_api_key,
+                base_url=self.embedding_openai_base_url
             )
 
-            self.embedding_client: openai.OpenAI = (
-                openai.AzureOpenAI(
-                    azure_ad_token_provider=token_provider if self.embedding_use_azure_token_provider else None,
-                    api_key=self.embedding_api_key if not self.embedding_use_azure_token_provider else None,
-                    api_version=self.embedding_api_version,
-                    azure_endpoint=self.embedding_api_base,
-                )
-                if self.embedding_use_azure
-                else openai.OpenAI(api_key=self.embedding_api_key, base_url=self.embedding_openai_base_url)
-            )
 
         self.dump_chat_cache = LLM_SETTINGS.dump_chat_cache if dump_chat_cache is None else dump_chat_cache
         self.use_chat_cache = LLM_SETTINGS.use_chat_cache if use_chat_cache is None else use_chat_cache
@@ -403,25 +360,13 @@ class APIBackend:
         This function attempts to handle several edge cases.
         """
 
-        # 1) cases
-        def _azure_patch(model: str) -> str:
-            """
-            When using Azure API, self.chat_model is the deployment name that can be any string.
-            For example, it may be `gpt-4o_2024-08-06`. But tiktoken.encoding_for_model can't handle this.
-            """
-            return model.replace("_", "-")
-
         model = self.chat_model
         try:
             encoding = tiktoken.encoding_for_model(model)
         except KeyError:
-            logger.warning(f"Failed to get encoder. Trying to patch the model name")
-            for patch_func in [_azure_patch]:
-                try:
-                    encoding = tiktoken.encoding_for_model(patch_func(model))
-                except KeyError:
-                    logger.error(f"Failed to get encoder even after patching with {patch_func.__name__}")
-                    raise
+            logger.warning(f"Failed to get encoder for model {model}")
+            raise
+
         return encoding
 
     def build_chat_session(
@@ -590,16 +535,11 @@ class APIBackend:
                 filtered_input_content_list[i : i + LLM_SETTINGS.embedding_max_str_num]
                 for i in range(0, len(filtered_input_content_list), LLM_SETTINGS.embedding_max_str_num)
             ]:
-                if self.embedding_use_azure:
-                    response = self.embedding_client.embeddings.create(
-                        model=self.embedding_model,
-                        input=sliced_filtered_input_content_list,
-                    )
-                else:
-                    response = self.embedding_client.embeddings.create(
-                        model=self.embedding_model,
-                        input=sliced_filtered_input_content_list,
-                    )
+                response = self.embedding_client.embeddings.create(
+                    model=self.embedding_model,
+                    input=sliced_filtered_input_content_list,
+                )
+
                 for index, data in enumerate(response.data):
                     content_to_embedding_dict[sliced_filtered_input_content_list[index]] = data.embedding
 

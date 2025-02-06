@@ -58,10 +58,8 @@ class RDAgentSettings(ExtendedBaseSettings):
     # TODO: (xiao) think it can be a separate config.
     log_trace_path: str | None = None
 
-    # azure document intelligence configs
-    azure_document_intelligence_key: str = ""
-    azure_document_intelligence_endpoint: str = ""
     # factor extraction conf
+
     max_input_duplicate_factor_group: int = 300
     max_output_duplicate_factor_group: int = 20
     max_kmeans_group_number: int = 40

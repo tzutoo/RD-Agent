@@ -98,7 +98,7 @@ Users must ensure Docker is installed before attempting most scenarios. Please r
   - json_mode
   - embedding query
 
-- For example: If you are using the `OpenAI API`, you have to configure your GPT model in the `.env` file like this.
+- Configure your GPT model in the `.env` file like this:
   ```bash
   cat << EOF  > .env
   OPENAI_API_KEY=<replace_with_your_openai_api_key>
@@ -106,21 +106,8 @@ Users must ensure Docker is installed before attempting most scenarios. Please r
   CHAT_MODEL=gpt-4-turbo
   EOF
   ```
-- However, not every API services support these features by devault. For example: `AZURE OpenAI`, you have to configure your GPT model in the `.env` file like this.
-  ```bash
-  cat << EOF  > .env
-  USE_AZURE=True
-  EMBEDDING_OPENAI_API_KEY=<replace_with_your_azure_openai_api_key>
-  EMBEDDING_AZURE_API_BASE=<replace_with_your_azure_endpoint>
-  EMBEDDING_AZURE_API_VERSION=<replace_with_the_version_of_your_azure_openai_api>
-  EMBEDDING_MODEL=text-embedding-3-small
-  CHAT_OPENAI_API_KEY=<replace_with_your_azure_openai_api_key>
-  CHAT_AZURE_API_BASE=<replace_with_your_azure_endpoint>
-  CHAT_AZURE_API_VERSION=<replace_with_the_version_of_your_azure_openai_api>
-  CHAT_MODEL=<replace_it_with_the_name_of_your_azure_chat_model>
-  EOF
-  ```
 - For more configuration information, please refer to the [documentation](https://rdagent.readthedocs.io/en/latest/installation_and_configuration.html).
+
 
 ### 🚀 Run the Application
 

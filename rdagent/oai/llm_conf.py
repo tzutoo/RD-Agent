@@ -13,14 +13,8 @@ class LLMSettings(ExtendedBaseSettings):
 
     log_llm_chat_content: bool = True
 
-    use_azure: bool = Field(default=False, deprecated=True)
-    chat_use_azure: bool = False
-    embedding_use_azure: bool = False
-
-    chat_use_azure_token_provider: bool = False
-    embedding_use_azure_token_provider: bool = False
-    managed_identity_client_id: str | None = None
     max_retry: int = 10
+
     retry_wait_seconds: int = 1
     dump_chat_cache: bool = False
     use_chat_cache: bool = False
@@ -43,9 +37,8 @@ class LLMSettings(ExtendedBaseSettings):
     openai_api_key: str = ""  # TODO: simplify the key design.
     chat_openai_api_key: str | None = None
     chat_openai_base_url: str | None = None  #
-    chat_azure_api_base: str = ""
-    chat_azure_api_version: str = ""
     chat_model: str = "gpt-4-turbo"
+
     chat_max_tokens: int = 3000
     chat_temperature: float = 0.5
     chat_stream: bool = True
@@ -60,9 +53,8 @@ class LLMSettings(ExtendedBaseSettings):
     # Embedding configs
     embedding_openai_api_key: str = ""
     embedding_openai_base_url: str = ""
-    embedding_azure_api_base: str = ""
-    embedding_azure_api_version: str = ""
     embedding_model: str = ""
+
     embedding_max_str_num: int = 50
 
     # offline llama2 related config
